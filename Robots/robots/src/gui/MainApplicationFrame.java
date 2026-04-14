@@ -3,6 +3,8 @@ package gui;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -10,6 +12,7 @@ import javax.swing.JInternalFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
@@ -36,8 +39,7 @@ public class MainApplicationFrame extends JFrame
             screenSize.height - inset*2);
 
         setContentPane(desktopPane);
-        
-        
+
         LogWindow logWindow = createLogWindow();
         addWindow(logWindow);
 
@@ -46,7 +48,13 @@ public class MainApplicationFrame extends JFrame
         addWindow(gameWindow);
 
         setJMenuBar(generateMenuBar());
-        setDefaultCloseOperation(EXIT_ON_CLOSE);
+        setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
+        addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                confirmExit();
+            }
+        });
     }
     
     protected LogWindow createLogWindow()
@@ -95,6 +103,18 @@ public class MainApplicationFrame extends JFrame
 //        return menuBar;
 //    }
     
+    private void confirmExit() {
+        int result = JOptionPane.showConfirmDialog(
+                this,
+                "Вы уверены, что хотите выйти?",
+                "Подтверждение выхода",
+                JOptionPane.YES_NO_OPTION);
+        if (result == JOptionPane.YES_OPTION) {
+            dispose();
+            System.exit(0);
+        }
+    }
+
     private JMenuBar generateMenuBar()
     {
         JMenuBar menuBar = new JMenuBar();
@@ -135,6 +155,15 @@ public class MainApplicationFrame extends JFrame
             testMenu.add(addLogMessageItem);
         }
 
+        JMenu fileMenu = new JMenu("Файл");
+        fileMenu.setMnemonic(KeyEvent.VK_F);
+        {
+            JMenuItem exitItem = new JMenuItem("Выход", KeyEvent.VK_X);
+            exitItem.addActionListener((event) -> confirmExit());
+            fileMenu.add(exitItem);
+        }
+
+        menuBar.add(fileMenu);
         menuBar.add(lookAndFeelMenu);
         menuBar.add(testMenu);
         return menuBar;
