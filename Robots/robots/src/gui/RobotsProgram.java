@@ -16,6 +16,11 @@ public class RobotsProgram
       } catch (Exception e) {
         e.printStackTrace();
       }
+      UIManager.put("OptionPane.yesButtonText", "Да");
+      UIManager.put("OptionPane.noButtonText", "Нет");
+      UIManager.put("OptionPane.cancelButtonText", "Отмена");
+      UIManager.put("OptionPane.okButtonText", "ОК");
+
       SwingUtilities.invokeLater(() -> {
         MainApplicationFrame frame = new MainApplicationFrame();
         frame.pack();
