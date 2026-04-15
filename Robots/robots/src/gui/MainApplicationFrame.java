@@ -17,6 +17,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import java.beans.PropertyVetoException;
+
 import log.Logger;
 
 /**
@@ -28,6 +30,10 @@ import log.Logger;
 public class MainApplicationFrame extends JFrame
 {
     private final JDesktopPane desktopPane = new JDesktopPane();
+    private final WindowStateManager stateManager = new WindowStateManager();
+
+    private LogWindow logWindow;
+    private GameWindow gameWindow;
     
     public MainApplicationFrame() {
         //Make the big window be indented 50 pixels from each edge
@@ -40,12 +46,16 @@ public class MainApplicationFrame extends JFrame
 
         setContentPane(desktopPane);
 
-        LogWindow logWindow = createLogWindow();
-        addWindow(logWindow);
+        stateManager.load();
 
-        GameWindow gameWindow = new GameWindow();
-        gameWindow.setSize(400,  400);
+        logWindow = createLogWindow();
+        addWindow(logWindow);
+        restoreWindowState(logWindow, "logWindow");
+
+        gameWindow = new GameWindow();
+        gameWindow.setSize(400, 400);
         addWindow(gameWindow);
+        restoreWindowState(gameWindow, "gameWindow");
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -110,8 +120,41 @@ public class MainApplicationFrame extends JFrame
                 "Подтверждение выхода",
                 JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
+            saveWindowState(logWindow, "logWindow");
+            saveWindowState(gameWindow, "gameWindow");
+            stateManager.save();
             dispose();
             System.exit(0);
+        }
+    }
+
+    /**
+     * Сохраняет положение и состояние (свёрнуто/нет) внутреннего окна.
+     */
+    private void saveWindowState(JInternalFrame frame, String prefix) {
+        stateManager.setInt(prefix, "x", frame.getX());
+        stateManager.setInt(prefix, "y", frame.getY());
+        stateManager.setInt(prefix, "width", frame.getWidth());
+        stateManager.setInt(prefix, "height", frame.getHeight());
+        stateManager.setBoolean(prefix, "iconified", frame.isIcon());
+    }
+
+    /**
+     * Восстанавливает положение и состояние внутреннего окна из сохранённой конфигурации.
+     * Если данных нет — окно остаётся в позиции по умолчанию.
+     */
+    private void restoreWindowState(JInternalFrame frame, String prefix) {
+        int x = stateManager.getInt(prefix, "x", frame.getX());
+        int y = stateManager.getInt(prefix, "y", frame.getY());
+        int width = stateManager.getInt(prefix, "width", frame.getWidth());
+        int height = stateManager.getInt(prefix, "height", frame.getHeight());
+        boolean iconified = stateManager.getBoolean(prefix, "iconified", false);
+
+        frame.setBounds(x, y, width, height);
+        try {
+            frame.setIcon(iconified);
+        } catch (PropertyVetoException e) {
+            // Если нельзя свернуть — оставляем как есть
         }
     }
 
