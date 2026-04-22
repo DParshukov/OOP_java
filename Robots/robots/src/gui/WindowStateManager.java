@@ -1,86 +1,59 @@
 package gui;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.util.Properties;
+import java.beans.PropertyVetoException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
-/**
- * Отвечает за сохранение и загрузку конфигурации окон приложения.
- * Хранит данные в файле robots_config.properties в домашнем каталоге пользователя.
- */
+import javax.swing.JInternalFrame;
+
+import log.Logger;
+
 public class WindowStateManager {
 
-    private static final String CONFIG_FILE =
-            System.getProperty("user.home") + File.separator + "robots_config.properties";
+    private final WindowStateStore store;
+    private final Map<String, JInternalFrame> windows = new LinkedHashMap<>();
 
-    private final Properties properties = new Properties();
+    public WindowStateManager(WindowStateStore store) {
+        this.store = store;
+    }
 
-    /**
-     * Загружает конфигурацию из файла.
-     * Если файл не существует — просто оставляет properties пустым (нет сохранённого состояния).
-     */
-    public void load() {
-        File file = new File(CONFIG_FILE);
-        if (!file.exists()) {
-            return;
+    public void registerAll(Map<String, JInternalFrame> windowMap) {
+        windows.putAll(windowMap);
+    }
+
+    public void saveAll() {
+        for (Map.Entry<String, JInternalFrame> entry : windows.entrySet()) {
+            saveWindowState(entry.getValue(), entry.getKey());
         }
-        try (FileInputStream in = new FileInputStream(file)) {
-            properties.load(in);
-        } catch (IOException e) {
-            // Если файл повреждён — работаем без сохранённого состояния
+        store.save();
+    }
+
+    public void restoreAll() {
+        for (Map.Entry<String, JInternalFrame> entry : windows.entrySet()) {
+            restoreWindowState(entry.getValue(), entry.getKey());
         }
     }
 
-    /**
-     * Сохраняет конфигурацию в файл.
-     */
-    public void save() {
-        try (FileOutputStream out = new FileOutputStream(CONFIG_FILE)) {
-            properties.store(out, "Robots application window state");
-        } catch (IOException e) {
-            // Не удалось сохранить — ничего страшного, при следующем запуске будет дефолт
-        }
+    private void saveWindowState(JInternalFrame frame, String prefix) {
+        store.setInt(prefix + ".x",         frame.getX());
+        store.setInt(prefix + ".y",         frame.getY());
+        store.setInt(prefix + ".width",     frame.getWidth());
+        store.setInt(prefix + ".height",    frame.getHeight());
+        store.setBoolean(prefix + ".iconified", frame.isIcon());
     }
 
-    /**
-     * Записывает целочисленное значение по ключу prefix.key.
-     */
-    public void setInt(String prefix, String key, int value) {
-        properties.setProperty(prefix + "." + key, String.valueOf(value));
-    }
+    private void restoreWindowState(JInternalFrame frame, String prefix) {
+        int x      = store.getInt(prefix + ".x",      frame.getX());
+        int y      = store.getInt(prefix + ".y",      frame.getY());
+        int width  = store.getInt(prefix + ".width",  frame.getWidth());
+        int height = store.getInt(prefix + ".height", frame.getHeight());
+        boolean icon = store.getBoolean(prefix + ".iconified", false);
 
-    /**
-     * Читает целочисленное значение. Если ключа нет — возвращает defaultValue.
-     */
-    public int getInt(String prefix, String key, int defaultValue) {
-        String value = properties.getProperty(prefix + "." + key);
-        if (value == null) {
-            return defaultValue;
-        }
+        frame.setBounds(x, y, width, height);
         try {
-            return Integer.parseInt(value);
-        } catch (NumberFormatException e) {
-            return defaultValue;
+            frame.setIcon(icon);
+        } catch (PropertyVetoException e) {
+            Logger.debug("Не удалось восстановить иконку окна \"" + prefix + "\": " + e.getMessage());
         }
-    }
-
-    /**
-     * Записывает булево значение по ключу prefix.key.
-     */
-    public void setBoolean(String prefix, String key, boolean value) {
-        properties.setProperty(prefix + "." + key, String.valueOf(value));
-    }
-
-    /**
-     * Читает булево значение. Если ключа нет — возвращает defaultValue.
-     */
-    public boolean getBoolean(String prefix, String key, boolean defaultValue) {
-        String value = properties.getProperty(prefix + "." + key);
-        if (value == null) {
-            return defaultValue;
-        }
-        return Boolean.parseBoolean(value);
     }
 }
