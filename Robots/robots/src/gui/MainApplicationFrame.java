@@ -19,6 +19,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import model.RobotModel;
+
 import log.Logger;
 
 public class MainApplicationFrame extends JFrame {

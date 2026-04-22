@@ -1,4 +1,4 @@
-package gui;
+package model;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,7 +77,6 @@ public class RobotModel {
 
         double angleToTarget = angleTo(robotX, robotY, targetX, targetY);
 
-        // Вычисляем кратчайшую дугу в (-π, π], чтобы избежать бага с wrap-around
         double diff = angleToTarget - robotDirection;
         diff = ((diff + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
 
