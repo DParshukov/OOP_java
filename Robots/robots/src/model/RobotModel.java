@@ -38,6 +38,8 @@ public class RobotModel {
 
     public double getRobotX() { return robotX; }
     public double getRobotY() { return robotY; }
+    public int getRobotXInt() { return (int)(robotX + 0.5); }
+    public int getRobotYInt() { return (int)(robotY + 0.5); }
     public double getRobotDirection() { return robotDirection; }
     public int getTargetX() { return targetX; }
     public int getTargetY() { return targetY; }

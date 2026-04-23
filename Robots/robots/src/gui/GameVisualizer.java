@@ -51,7 +51,7 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
     public void paint(Graphics g) {
         super.paint(g);
         Graphics2D g2d = (Graphics2D) g;
-        drawRobot(g2d, (int)(model.getRobotX() + 0.5), (int)(model.getRobotY() + 0.5), model.getRobotDirection());
+        drawRobot(g2d, model.getRobotXInt(), model.getRobotYInt(), model.getRobotDirection());
         drawTarget(g2d, model.getTargetX(), model.getTargetY());
     }
 
