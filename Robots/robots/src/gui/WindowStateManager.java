@@ -1,31 +1,35 @@
 package gui;
 
 import java.beans.PropertyVetoException;
-import java.util.LinkedHashMap;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.JInternalFrame;
 
+import config.Config;
+import config.ConfigStore;
 import log.Logger;
 
 public class WindowStateManager {
 
-    private final WindowStateStore store;
-    private final Map<String, JInternalFrame> windows = new LinkedHashMap<>();
+    private final Config config;
+    private final ConfigStore store;
+    private final Map<String, JInternalFrame> windows = new HashMap<>();
 
-    public WindowStateManager(WindowStateStore store) {
+    public WindowStateManager(Config config, ConfigStore store) {
+        this.config = config;
         this.store = store;
     }
 
-    public void registerAll(Map<String, JInternalFrame> windowMap) {
-        windows.putAll(windowMap);
+    public void register(String key, JInternalFrame frame) {
+        windows.put(key, frame);
     }
 
     public void saveAll() {
         for (Map.Entry<String, JInternalFrame> entry : windows.entrySet()) {
             saveWindowState(entry.getValue(), entry.getKey());
         }
-        store.save();
+        store.save(config);
     }
 
     public void restoreAll() {
@@ -35,19 +39,19 @@ public class WindowStateManager {
     }
 
     private void saveWindowState(JInternalFrame frame, String prefix) {
-        store.setInt(prefix + ".x",         frame.getX());
-        store.setInt(prefix + ".y",         frame.getY());
-        store.setInt(prefix + ".width",     frame.getWidth());
-        store.setInt(prefix + ".height",    frame.getHeight());
-        store.setBoolean(prefix + ".iconified", frame.isIcon());
+        config.setInt(prefix + ".x",         frame.getX());
+        config.setInt(prefix + ".y",         frame.getY());
+        config.setInt(prefix + ".width",     frame.getWidth());
+        config.setInt(prefix + ".height",    frame.getHeight());
+        config.setBoolean(prefix + ".iconified", frame.isIcon());
     }
 
     private void restoreWindowState(JInternalFrame frame, String prefix) {
-        int x      = store.getInt(prefix + ".x",      frame.getX());
-        int y      = store.getInt(prefix + ".y",      frame.getY());
-        int width  = store.getInt(prefix + ".width",  frame.getWidth());
-        int height = store.getInt(prefix + ".height", frame.getHeight());
-        boolean icon = store.getBoolean(prefix + ".iconified", false);
+        int x       = config.getInt(prefix + ".x",      frame.getX());
+        int y       = config.getInt(prefix + ".y",      frame.getY());
+        int width   = config.getInt(prefix + ".width",  frame.getWidth());
+        int height  = config.getInt(prefix + ".height", frame.getHeight());
+        boolean icon = config.getBoolean(prefix + ".iconified", false);
 
         frame.setBounds(x, y, width, height);
         try {

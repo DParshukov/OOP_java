@@ -1,11 +1,12 @@
 package gui;
 
-import log.Logger;
-
 import java.awt.Frame;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
+
+import config.Config;
+import config.ConfigStore;
 
 public class RobotsProgram {
     public static void main(String[] args) {
@@ -20,12 +21,9 @@ public class RobotsProgram {
         UIManager.put("OptionPane.okButtonText",     "ОК");
 
         SwingUtilities.invokeLater(() -> {
-            WindowStateStore store = new WindowStateStore();
-            boolean loaded = store.load();
-            if (!loaded) {
-                Logger.debug("Файл конфигурации не найден, используются значения по умолчанию");
-            }
-            WindowStateManager stateManager = new WindowStateManager(store);
+            ConfigStore configStore = new ConfigStore();
+            Config config = configStore.load();
+            WindowStateManager stateManager = new WindowStateManager(config, configStore);
             MainApplicationFrame frame = new MainApplicationFrame(stateManager);
             frame.pack();
             frame.setVisible(true);
