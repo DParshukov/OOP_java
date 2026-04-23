@@ -31,6 +31,7 @@ public class RobotCoordinatesWindow extends JInternalFrame implements RobotModel
 
         getContentPane().add(panel);
         pack();
+        setSize(280, 120);
         updateLabels();
     }
 

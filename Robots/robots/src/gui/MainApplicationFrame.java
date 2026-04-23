@@ -5,8 +5,6 @@ import java.awt.Toolkit;
 import java.awt.event.KeyEvent;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import javax.swing.JDesktopPane;
 import javax.swing.JFrame;
@@ -37,22 +35,15 @@ public class MainApplicationFrame extends JFrame {
         setContentPane(desktopPane);
 
         LogWindow logWindow = createLogWindow();
-        addWindow(logWindow);
+        addWindow("logWindow", logWindow);
 
         GameWindow gameWindow = new GameWindow(robotModel);
-        gameWindow.setSize(400, 400);
-        addWindow(gameWindow);
+        addWindow("gameWindow", gameWindow);
 
         RobotCoordinatesWindow coordinatesWindow = new RobotCoordinatesWindow(robotModel);
-        coordinatesWindow.setSize(280, 120);
         coordinatesWindow.setLocation(420, 10);
-        addWindow(coordinatesWindow);
+        addWindow("coordinatesWindow", coordinatesWindow);
 
-        Map<String, JInternalFrame> windows = new LinkedHashMap<>();
-        windows.put("logWindow",         logWindow);
-        windows.put("gameWindow",        gameWindow);
-        windows.put("coordinatesWindow", coordinatesWindow);
-        stateManager.registerAll(windows);
         stateManager.restoreAll();
 
         setJMenuBar(generateMenuBar());
@@ -68,16 +59,15 @@ public class MainApplicationFrame extends JFrame {
     protected LogWindow createLogWindow() {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
         logWindow.setLocation(10, 10);
-        logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
-        logWindow.pack();
         Logger.debug("Протокол работает");
         return logWindow;
     }
 
-    protected void addWindow(JInternalFrame frame) {
+    protected void addWindow(String key, JInternalFrame frame) {
         desktopPane.add(frame);
         frame.setVisible(true);
+        stateManager.register(key, frame);
     }
 
     private void confirmExit() {
