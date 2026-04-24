@@ -23,8 +23,8 @@ public class RobotsProgram {
         SwingUtilities.invokeLater(() -> {
             ConfigStore configStore = new ConfigStore();
             Config config = configStore.load();
-            WindowStateManager stateManager = new WindowStateManager(config, configStore);
-            MainApplicationFrame frame = new MainApplicationFrame(stateManager);
+            WindowStateManager stateManager = new WindowStateManager(config);
+            MainApplicationFrame frame = new MainApplicationFrame(stateManager, configStore);
             frame.pack();
             frame.setVisible(true);
             frame.setExtendedState(Frame.MAXIMIZED_BOTH);

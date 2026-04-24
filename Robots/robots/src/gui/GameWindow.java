@@ -5,6 +5,8 @@ import java.awt.BorderLayout;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 
+import model.RobotModel;
+
 public class GameWindow extends JInternalFrame {
 
     public GameWindow(RobotModel model) {

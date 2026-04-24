@@ -12,6 +12,9 @@ import java.util.TimerTask;
 
 import javax.swing.JPanel;
 
+import model.RobotModel;
+import model.RobotModelListener;
+
 public class GameVisualizer extends JPanel implements RobotModelListener {
 
     private final RobotModel model;

@@ -7,18 +7,15 @@ import java.util.Map;
 import javax.swing.JInternalFrame;
 
 import config.Config;
-import config.ConfigStore;
 import log.Logger;
 
 public class WindowStateManager {
 
     private final Config config;
-    private final ConfigStore store;
     private final Map<String, JInternalFrame> windows = new HashMap<>();
 
-    public WindowStateManager(Config config, ConfigStore store) {
+    public WindowStateManager(Config config) {
         this.config = config;
-        this.store = store;
     }
 
     public void register(String key, JInternalFrame frame) {
@@ -29,7 +26,6 @@ public class WindowStateManager {
         for (Map.Entry<String, JInternalFrame> entry : windows.entrySet()) {
             saveWindowState(entry.getValue(), entry.getKey());
         }
-        store.save(config);
     }
 
     public void restoreAll() {
@@ -47,10 +43,10 @@ public class WindowStateManager {
     }
 
     private void restoreWindowState(JInternalFrame frame, String prefix) {
-        int x       = config.getInt(prefix + ".x",      frame.getX());
-        int y       = config.getInt(prefix + ".y",      frame.getY());
-        int width   = config.getInt(prefix + ".width",  frame.getWidth());
-        int height  = config.getInt(prefix + ".height", frame.getHeight());
+        int x        = config.getInt(prefix + ".x",      frame.getX());
+        int y        = config.getInt(prefix + ".y",      frame.getY());
+        int width    = config.getInt(prefix + ".width",  frame.getWidth());
+        int height   = config.getInt(prefix + ".height", frame.getHeight());
         boolean icon = config.getBoolean(prefix + ".iconified", false);
 
         frame.setBounds(x, y, width, height);

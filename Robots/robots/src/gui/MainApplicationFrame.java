@@ -17,16 +17,20 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import config.ConfigStore;
+import model.RobotModel;
 import log.Logger;
 
 public class MainApplicationFrame extends JFrame {
 
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final WindowStateManager stateManager;
+    private final ConfigStore configStore;
     private final RobotModel robotModel = new RobotModel();
 
-    public MainApplicationFrame(WindowStateManager stateManager) {
+    public MainApplicationFrame(WindowStateManager stateManager, ConfigStore configStore) {
         this.stateManager = stateManager;
+        this.configStore = configStore;
 
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -78,6 +82,7 @@ public class MainApplicationFrame extends JFrame {
                 JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
             stateManager.saveAll();
+            configStore.save();
             dispose();
             System.exit(0);
         }
