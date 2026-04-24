@@ -8,6 +8,9 @@ import javax.swing.JInternalFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import model.RobotModel;
+import model.RobotModelListener;
+
 public class RobotCoordinatesWindow extends JInternalFrame implements RobotModelListener {
 
     private final RobotModel model;
@@ -31,6 +34,7 @@ public class RobotCoordinatesWindow extends JInternalFrame implements RobotModel
 
         getContentPane().add(panel);
         pack();
+        setSize(280, 120);
         updateLabels();
     }
 

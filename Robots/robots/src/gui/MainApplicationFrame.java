@@ -17,43 +17,38 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import java.beans.PropertyVetoException;
-
+import config.ConfigStore;
+import model.RobotModel;
 import log.Logger;
 
 public class MainApplicationFrame extends JFrame {
 
     private final JDesktopPane desktopPane = new JDesktopPane();
-    private final WindowStateManager stateManager = new WindowStateManager();
-
+    private final WindowStateManager stateManager;
+    private final ConfigStore configStore;
     private final RobotModel robotModel = new RobotModel();
 
-    private LogWindow logWindow;
-    private GameWindow gameWindow;
-    private RobotCoordinatesWindow coordinatesWindow;
+    public MainApplicationFrame(WindowStateManager stateManager, ConfigStore configStore) {
+        this.stateManager = stateManager;
+        this.configStore = configStore;
 
-    public MainApplicationFrame() {
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         setBounds(inset, inset, screenSize.width - inset * 2, screenSize.height - inset * 2);
 
         setContentPane(desktopPane);
-        stateManager.load();
 
-        logWindow = createLogWindow();
-        addWindow(logWindow);
-        restoreWindowState(logWindow, "logWindow");
+        LogWindow logWindow = createLogWindow();
+        addWindow("logWindow", logWindow);
 
-        gameWindow = new GameWindow(robotModel);
-        gameWindow.setSize(400, 400);
-        addWindow(gameWindow);
-        restoreWindowState(gameWindow, "gameWindow");
+        GameWindow gameWindow = new GameWindow(robotModel);
+        addWindow("gameWindow", gameWindow);
 
-        coordinatesWindow = new RobotCoordinatesWindow(robotModel);
-        coordinatesWindow.setSize(280, 120);
+        RobotCoordinatesWindow coordinatesWindow = new RobotCoordinatesWindow(robotModel);
         coordinatesWindow.setLocation(420, 10);
-        addWindow(coordinatesWindow);
-        restoreWindowState(coordinatesWindow, "coordinatesWindow");
+        addWindow("coordinatesWindow", coordinatesWindow);
+
+        stateManager.restoreAll();
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -68,16 +63,15 @@ public class MainApplicationFrame extends JFrame {
     protected LogWindow createLogWindow() {
         LogWindow logWindow = new LogWindow(Logger.getDefaultLogSource());
         logWindow.setLocation(10, 10);
-        logWindow.setSize(300, 800);
         setMinimumSize(logWindow.getSize());
-        logWindow.pack();
         Logger.debug("Протокол работает");
         return logWindow;
     }
 
-    protected void addWindow(JInternalFrame frame) {
+    protected void addWindow(String key, JInternalFrame frame) {
         desktopPane.add(frame);
         frame.setVisible(true);
+        stateManager.register(key, frame);
     }
 
     private void confirmExit() {
@@ -87,35 +81,10 @@ public class MainApplicationFrame extends JFrame {
                 "Подтверждение выхода",
                 JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
-            saveWindowState(logWindow, "logWindow");
-            saveWindowState(gameWindow, "gameWindow");
-            saveWindowState(coordinatesWindow, "coordinatesWindow");
-            stateManager.save();
+            stateManager.saveAll();
+            configStore.save();
             dispose();
             System.exit(0);
-        }
-    }
-
-    private void saveWindowState(JInternalFrame frame, String prefix) {
-        stateManager.setInt(prefix, "x", frame.getX());
-        stateManager.setInt(prefix, "y", frame.getY());
-        stateManager.setInt(prefix, "width", frame.getWidth());
-        stateManager.setInt(prefix, "height", frame.getHeight());
-        stateManager.setBoolean(prefix, "iconified", frame.isIcon());
-    }
-
-    private void restoreWindowState(JInternalFrame frame, String prefix) {
-        int x = stateManager.getInt(prefix, "x", frame.getX());
-        int y = stateManager.getInt(prefix, "y", frame.getY());
-        int width = stateManager.getInt(prefix, "width", frame.getWidth());
-        int height = stateManager.getInt(prefix, "height", frame.getHeight());
-        boolean iconified = stateManager.getBoolean(prefix, "iconified", false);
-
-        frame.setBounds(x, y, width, height);
-        try {
-            frame.setIcon(iconified);
-        } catch (PropertyVetoException e) {
-            // оставляем как есть
         }
     }
 

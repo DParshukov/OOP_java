@@ -5,6 +5,8 @@ import java.awt.BorderLayout;
 import javax.swing.JInternalFrame;
 import javax.swing.JPanel;
 
+import model.RobotModel;
+
 public class GameWindow extends JInternalFrame {
 
     public GameWindow(RobotModel model) {
@@ -14,5 +16,6 @@ public class GameWindow extends JInternalFrame {
         panel.add(visualizer, BorderLayout.CENTER);
         getContentPane().add(panel);
         pack();
+        setSize(400, 400);
     }
 }
