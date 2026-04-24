@@ -1,40 +1,30 @@
 package gui;
 
 import java.beans.PropertyVetoException;
-import java.util.HashMap;
-import java.util.Map;
 
+import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 
 import config.Config;
-import config.ConfigStore;
 import log.Logger;
 
 public class WindowStateManager {
 
     private final Config config;
-    private final ConfigStore store;
-    private final Map<String, JInternalFrame> windows = new HashMap<>();
 
-    public WindowStateManager(Config config, ConfigStore store) {
+    public WindowStateManager(Config config) {
         this.config = config;
-        this.store = store;
     }
 
-    public void register(String key, JInternalFrame frame) {
-        windows.put(key, frame);
-    }
-
-    public void saveAll() {
-        for (Map.Entry<String, JInternalFrame> entry : windows.entrySet()) {
-            saveWindowState(entry.getValue(), entry.getKey());
+    public void saveAll(JDesktopPane desktopPane) {
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            saveWindowState(frame, frame.getName());
         }
-        store.save(config);
     }
 
-    public void restoreAll() {
-        for (Map.Entry<String, JInternalFrame> entry : windows.entrySet()) {
-            restoreWindowState(entry.getValue(), entry.getKey());
+    public void restoreAll(JDesktopPane desktopPane) {
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            restoreWindowState(frame, frame.getName());
         }
     }
 
@@ -47,10 +37,10 @@ public class WindowStateManager {
     }
 
     private void restoreWindowState(JInternalFrame frame, String prefix) {
-        int x       = config.getInt(prefix + ".x",      frame.getX());
-        int y       = config.getInt(prefix + ".y",      frame.getY());
-        int width   = config.getInt(prefix + ".width",  frame.getWidth());
-        int height  = config.getInt(prefix + ".height", frame.getHeight());
+        int x        = config.getInt(prefix + ".x",      frame.getX());
+        int y        = config.getInt(prefix + ".y",      frame.getY());
+        int width    = config.getInt(prefix + ".width",  frame.getWidth());
+        int height   = config.getInt(prefix + ".height", frame.getHeight());
         boolean icon = config.getBoolean(prefix + ".iconified", false);
 
         frame.setBounds(x, y, width, height);

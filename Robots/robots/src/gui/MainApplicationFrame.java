@@ -17,18 +17,20 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import config.ConfigStore;
 import model.RobotModel;
-
 import log.Logger;
 
 public class MainApplicationFrame extends JFrame {
 
     private final JDesktopPane desktopPane = new JDesktopPane();
     private final WindowStateManager stateManager;
+    private final ConfigStore configStore;
     private final RobotModel robotModel = new RobotModel();
 
-    public MainApplicationFrame(WindowStateManager stateManager) {
+    public MainApplicationFrame(WindowStateManager stateManager, ConfigStore configStore) {
         this.stateManager = stateManager;
+        this.configStore = configStore;
 
         int inset = 50;
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -46,7 +48,7 @@ public class MainApplicationFrame extends JFrame {
         coordinatesWindow.setLocation(420, 10);
         addWindow("coordinatesWindow", coordinatesWindow);
 
-        stateManager.restoreAll();
+        stateManager.restoreAll(desktopPane);
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -67,9 +69,9 @@ public class MainApplicationFrame extends JFrame {
     }
 
     protected void addWindow(String key, JInternalFrame frame) {
+        frame.setName(key);
         desktopPane.add(frame);
         frame.setVisible(true);
-        stateManager.register(key, frame);
     }
 
     private void confirmExit() {
@@ -79,7 +81,8 @@ public class MainApplicationFrame extends JFrame {
                 "Подтверждение выхода",
                 JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
-            stateManager.saveAll();
+            stateManager.saveAll(desktopPane);
+            configStore.save();
             dispose();
             System.exit(0);
         }
