@@ -34,6 +34,7 @@ public class RobotModel {
     public void setTarget(int x, int y) {
         targetX = x;
         targetY = y;
+        notifyTargetChanged();
     }
 
     public double getRobotX() { return robotX; }
@@ -55,6 +56,21 @@ public class RobotModel {
         synchronized (listeners) {
             listeners.remove(listener);
             activeListeners = null;
+        }
+    }
+
+    private void notifyTargetChanged() {
+        RobotModelListener[] current = activeListeners;
+        if (current == null) {
+            synchronized (listeners) {
+                if (activeListeners == null) {
+                    activeListeners = listeners.toArray(new RobotModelListener[0]);
+                }
+                current = activeListeners;
+            }
+        }
+        for (RobotModelListener l : current) {
+            l.onTargetChanged();
         }
     }
 
@@ -80,7 +96,7 @@ public class RobotModel {
         double angleToTarget = angleTo(robotX, robotY, targetX, targetY);
 
         double diff = angleToTarget - robotDirection;
-        diff = ((diff + Math.PI) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI) - Math.PI;
+        diff = Math.atan2(Math.sin(diff), Math.cos(diff));
 
         double angularVelocity = 0;
         if (Math.abs(diff) > 1e-6) {

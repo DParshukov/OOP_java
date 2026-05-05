@@ -4,8 +4,6 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.event.MouseAdapter;
-import java.awt.event.MouseEvent;
 import java.awt.geom.AffineTransform;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -31,20 +29,11 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
             }
         }, 0, 50);
 
-        addMouseListener(new MouseAdapter() {
-            @Override
-            public void mouseClicked(MouseEvent e) {
-                model.setTarget(e.getX(), e.getY());
-                repaint();
-            }
-        });
-
         setDoubleBuffered(true);
     }
 
     @Override
     public void onRobotMoved() {
-        // Перерисовка уже запланирована таймером каждые 50 мс
     }
 
     @Override

@@ -16,6 +16,10 @@ public class WindowStateManager {
         this.config = config;
     }
 
+    public Config getConfig() {
+        return config;
+    }
+
     public void saveAll(JDesktopPane desktopPane) {
         for (JInternalFrame frame : desktopPane.getAllFrames()) {
             saveWindowState(frame, frame.getName());
