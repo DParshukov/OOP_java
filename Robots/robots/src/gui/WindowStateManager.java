@@ -1,9 +1,8 @@
 package gui;
 
 import java.beans.PropertyVetoException;
-import java.util.HashMap;
-import java.util.Map;
 
+import javax.swing.JDesktopPane;
 import javax.swing.JInternalFrame;
 
 import config.Config;
@@ -12,25 +11,24 @@ import log.Logger;
 public class WindowStateManager {
 
     private final Config config;
-    private final Map<String, JInternalFrame> windows = new HashMap<>();
 
     public WindowStateManager(Config config) {
         this.config = config;
     }
 
-    public void register(String key, JInternalFrame frame) {
-        windows.put(key, frame);
+    public Config getConfig() {
+        return config;
     }
 
-    public void saveAll() {
-        for (Map.Entry<String, JInternalFrame> entry : windows.entrySet()) {
-            saveWindowState(entry.getValue(), entry.getKey());
+    public void saveAll(JDesktopPane desktopPane) {
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            saveWindowState(frame, frame.getName());
         }
     }
 
-    public void restoreAll() {
-        for (Map.Entry<String, JInternalFrame> entry : windows.entrySet()) {
-            restoreWindowState(entry.getValue(), entry.getKey());
+    public void restoreAll(JDesktopPane desktopPane) {
+        for (JInternalFrame frame : desktopPane.getAllFrames()) {
+            restoreWindowState(frame, frame.getName());
         }
     }
 

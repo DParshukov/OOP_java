@@ -48,7 +48,7 @@ public class MainApplicationFrame extends JFrame {
         coordinatesWindow.setLocation(420, 10);
         addWindow("coordinatesWindow", coordinatesWindow);
 
-        stateManager.restoreAll();
+        stateManager.restoreAll(desktopPane);
 
         setJMenuBar(generateMenuBar());
         setDefaultCloseOperation(DO_NOTHING_ON_CLOSE);
@@ -69,9 +69,9 @@ public class MainApplicationFrame extends JFrame {
     }
 
     protected void addWindow(String key, JInternalFrame frame) {
+        frame.setName(key);
         desktopPane.add(frame);
         frame.setVisible(true);
-        stateManager.register(key, frame);
     }
 
     private void confirmExit() {
@@ -81,7 +81,7 @@ public class MainApplicationFrame extends JFrame {
                 "Подтверждение выхода",
                 JOptionPane.YES_NO_OPTION);
         if (result == JOptionPane.YES_OPTION) {
-            stateManager.saveAll();
+            stateManager.saveAll(desktopPane);
             configStore.save();
             dispose();
             System.exit(0);
