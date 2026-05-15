@@ -10,18 +10,15 @@ import java.util.TimerTask;
 
 import javax.swing.JPanel;
 
-import model.RobotModel;
 import model.RobotModelListener;
+import model.RobotSnapshot;
 
 public class GameVisualizer extends JPanel implements RobotModelListener {
 
-    private final RobotModel model;
+    private volatile RobotSnapshot snapshot;
     private final Timer redrawTimer = new Timer("redraw-timer", true);
 
-    public GameVisualizer(RobotModel model) {
-        this.model = model;
-        model.registerListener(this);
-
+    public GameVisualizer() {
         redrawTimer.schedule(new TimerTask() {
             @Override
             public void run() {
@@ -33,15 +30,23 @@ public class GameVisualizer extends JPanel implements RobotModelListener {
     }
 
     @Override
-    public void onRobotMoved() {
+    public void onRobotMoved(RobotSnapshot s) {
+        snapshot = s;
+    }
+
+    @Override
+    public void onTargetChanged(RobotSnapshot s) {
+        snapshot = s;
     }
 
     @Override
     public void paint(Graphics g) {
         super.paint(g);
+        RobotSnapshot s = snapshot;
+        if (s == null) return;
         Graphics2D g2d = (Graphics2D) g;
-        drawRobot(g2d, model.getRobotXInt(), model.getRobotYInt(), model.getRobotDirection());
-        drawTarget(g2d, model.getTargetX(), model.getTargetY());
+        drawRobot(g2d, s.getRobotXInt(), s.getRobotYInt(), s.getRobotDirection());
+        drawTarget(g2d, s.getTargetX(), s.getTargetY());
     }
 
     private void drawRobot(Graphics2D g, int x, int y, double direction) {

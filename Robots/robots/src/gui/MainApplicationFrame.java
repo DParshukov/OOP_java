@@ -41,10 +41,16 @@ public class MainApplicationFrame extends JFrame {
         LogWindow logWindow = createLogWindow();
         addWindow("logWindow", logWindow);
 
-        GameWindow gameWindow = new GameWindow(robotModel);
+        GameVisualizer visualizer = new GameVisualizer();
+        robotModel.registerListener(visualizer);
+        new GameController(robotModel, visualizer);
+        new RobotMovementController(robotModel);
+
+        GameWindow gameWindow = new GameWindow(visualizer);
         addWindow("gameWindow", gameWindow);
 
-        RobotCoordinatesWindow coordinatesWindow = new RobotCoordinatesWindow(robotModel);
+        RobotCoordinatesWindow coordinatesWindow = new RobotCoordinatesWindow();
+        robotModel.registerListener(coordinatesWindow);
         coordinatesWindow.setLocation(420, 10);
         addWindow("coordinatesWindow", coordinatesWindow);
 

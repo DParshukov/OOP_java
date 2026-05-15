@@ -1,6 +1,6 @@
 package model;
 
 public interface RobotModelListener {
-    void onRobotMoved();
-    default void onTargetChanged() {}
+    void onRobotMoved(RobotSnapshot snapshot);
+    default void onTargetChanged(RobotSnapshot snapshot) {}
 }
