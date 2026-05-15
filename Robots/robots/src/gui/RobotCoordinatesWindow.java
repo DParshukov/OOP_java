@@ -7,15 +7,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 
-import model.RobotModel;
 import model.RobotModelListener;
-
-import model.RobotModel;
-import model.RobotModelListener;
+import model.RobotSnapshot;
 
 public class RobotCoordinatesWindow extends JInternalFrame implements RobotModelListener {
 
-    private final RobotModel model;
     private final DefaultTableModel tableModel;
 
     private static final String[] COLUMNS = {"Параметр", "Значение"};
@@ -23,10 +19,8 @@ public class RobotCoordinatesWindow extends JInternalFrame implements RobotModel
         "Робот X", "Робот Y", "Направление (рад)", "Цель X", "Цель Y"
     };
 
-    public RobotCoordinatesWindow(RobotModel model) {
+    public RobotCoordinatesWindow() {
         super("Координаты робота", true, true, true, true);
-        this.model = model;
-        model.registerListener(this);
 
         tableModel = new DefaultTableModel(COLUMNS, ROWS.length) {
             @Override
@@ -46,32 +40,26 @@ public class RobotCoordinatesWindow extends JInternalFrame implements RobotModel
         getContentPane().add(new JScrollPane(table));
         pack();
         setSize(300, 160);
-        updateAll();
     }
 
     @Override
-    public void onRobotMoved() {
-        EventQueue.invokeLater(this::updateRobot);
+    public void onRobotMoved(RobotSnapshot s) {
+        EventQueue.invokeLater(() -> updateRobot(s));
     }
 
     @Override
-    public void onTargetChanged() {
-        EventQueue.invokeLater(this::updateTarget);
+    public void onTargetChanged(RobotSnapshot s) {
+        EventQueue.invokeLater(() -> updateTarget(s));
     }
 
-    private void updateRobot() {
-        tableModel.setValueAt(String.format("%.1f", model.getRobotX()), 0, 1);
-        tableModel.setValueAt(String.format("%.1f", model.getRobotY()), 1, 1);
-        tableModel.setValueAt(String.format("%.3f", model.getRobotDirection()), 2, 1);
+    private void updateRobot(RobotSnapshot s) {
+        tableModel.setValueAt(String.format("%.1f", s.getRobotX()), 0, 1);
+        tableModel.setValueAt(String.format("%.1f", s.getRobotY()), 1, 1);
+        tableModel.setValueAt(String.format("%.3f", s.getRobotDirection()), 2, 1);
     }
 
-    private void updateTarget() {
-        tableModel.setValueAt(String.valueOf(model.getTargetX()), 3, 1);
-        tableModel.setValueAt(String.valueOf(model.getTargetY()), 4, 1);
-    }
-
-    private void updateAll() {
-        updateRobot();
-        updateTarget();
+    private void updateTarget(RobotSnapshot s) {
+        tableModel.setValueAt(String.valueOf(s.getTargetX()), 3, 1);
+        tableModel.setValueAt(String.valueOf(s.getTargetY()), 4, 1);
     }
 }

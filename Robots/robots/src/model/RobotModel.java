@@ -2,8 +2,6 @@ package model;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class RobotModel {
 
@@ -20,30 +18,11 @@ public class RobotModel {
     private final List<RobotModelListener> listeners = new ArrayList<>();
     private volatile RobotModelListener[] activeListeners = new RobotModelListener[0];
 
-    private final Timer timer = new Timer("model-timer", true);
-
-    public RobotModel() {
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                update();
-            }
-        }, 0, 10);
-    }
-
     public void setTarget(int x, int y) {
         targetX = x;
         targetY = y;
         notifyTargetChanged();
     }
-
-    public double getRobotX() { return robotX; }
-    public double getRobotY() { return robotY; }
-    public int getRobotXInt() { return (int)(robotX + 0.5); }
-    public int getRobotYInt() { return (int)(robotY + 0.5); }
-    public double getRobotDirection() { return robotDirection; }
-    public int getTargetX() { return targetX; }
-    public int getTargetY() { return targetY; }
 
     public void registerListener(RobotModelListener listener) {
         synchronized (listeners) {
@@ -59,37 +38,11 @@ public class RobotModel {
         }
     }
 
-    private void notifyTargetChanged() {
-        RobotModelListener[] current = activeListeners;
-        if (current == null) {
-            synchronized (listeners) {
-                if (activeListeners == null) {
-                    activeListeners = listeners.toArray(new RobotModelListener[0]);
-                }
-                current = activeListeners;
-            }
-        }
-        for (RobotModelListener l : current) {
-            l.onTargetChanged();
-        }
+    public RobotSnapshot snapshot() {
+        return new RobotSnapshot(robotX, robotY, robotDirection, targetX, targetY);
     }
 
-    private void notifyListeners() {
-        RobotModelListener[] current = activeListeners;
-        if (current == null) {
-            synchronized (listeners) {
-                if (activeListeners == null) {
-                    activeListeners = listeners.toArray(new RobotModelListener[0]);
-                }
-                current = activeListeners;
-            }
-        }
-        for (RobotModelListener l : current) {
-            l.onRobotMoved();
-        }
-    }
-
-    private void update() {
+    public void tick(double durationMillis) {
         double dist = distance(targetX, targetY, robotX, robotY);
         if (dist < 0.5) return;
 
@@ -103,8 +56,35 @@ public class RobotModel {
             angularVelocity = diff > 0 ? MAX_ANGULAR_VELOCITY : -MAX_ANGULAR_VELOCITY;
         }
 
-        move(MAX_VELOCITY, angularVelocity, 10);
-        notifyListeners();
+        move(MAX_VELOCITY, angularVelocity, durationMillis);
+        notifyRobotMoved();
+    }
+
+    private RobotModelListener[] currentListeners() {
+        RobotModelListener[] current = activeListeners;
+        if (current == null) {
+            synchronized (listeners) {
+                if (activeListeners == null) {
+                    activeListeners = listeners.toArray(new RobotModelListener[0]);
+                }
+                current = activeListeners;
+            }
+        }
+        return current;
+    }
+
+    private void notifyTargetChanged() {
+        RobotSnapshot s = snapshot();
+        for (RobotModelListener l : currentListeners()) {
+            l.onTargetChanged(s);
+        }
+    }
+
+    private void notifyRobotMoved() {
+        RobotSnapshot s = snapshot();
+        for (RobotModelListener l : currentListeners()) {
+            l.onRobotMoved(s);
+        }
     }
 
     private void move(double velocity, double angularVelocity, double duration) {
